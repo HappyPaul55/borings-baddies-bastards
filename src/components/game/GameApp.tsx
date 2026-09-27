@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Game, PHASE_LABELS, type Phase } from "../../lib/game-store";
 import { GameClientContext, useGameSnapshot } from "./GameContext";
 import { PhaseBadge } from "./PhaseBadge";
+import { FullscreenButton } from "./FullscreenButton";
 import { Alert } from "./Alert";
 import { SetupPhase } from "./SetupPhase";
 import { CategoryPhase } from "./CategoryPhase";
@@ -38,6 +39,7 @@ function GameShell({ client }: { client: Game }) {
 
   return (
     <div id="game" className="game-shell">
+      <FullscreenButton />
       <PhaseBadge phase={snapshot.phase} />
       <p
         id="phase-status"
