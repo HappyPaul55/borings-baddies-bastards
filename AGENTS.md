@@ -2,7 +2,7 @@
 
 ## What this repo is
 
-A standalone **game site** for **Boring, Baddie & Bastards** — brand **B3**
+A standalone **game site** for **Borings, Baddies & Bastards** — brand **B3**
 (`b3.happypaul55.com`). It follows the agency client-site standard: one
 self-contained repository, no monorepo, no shared template, no workspace or
 submodule dependency. Structure follows the Lexiphanic reference build; the

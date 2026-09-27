@@ -1,5 +1,5 @@
 /**
- * Pure game logic for Boring, Baddie & Bastards.
+ * Pure game logic for Borings, Baddies & Bastards.
  *
  * Nothing in this module touches the DOM or the network, so the rules that
  * drive the game are also the rules rendered on the /rules page. Keep it that

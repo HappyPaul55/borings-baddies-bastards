@@ -1,10 +1,10 @@
 ---
 title: Privacy Policy
-description: How Boring, Baddie & Bastards handles information when you play. No accounts, no cookies, no analytics.
+description: How Borings, Baddies & Bastards handles information when you play. No accounts, no cookies, no analytics.
 updated: "2026-09-27"
 ---
 
-Boring, Baddie & Bastards is a free browser game. It has no accounts, no
+Borings, Baddies & Bastards is a free browser game. It has no accounts, no
 newsletter and no advertising. This notice explains the very small amount of
 information the game touches, and why.
 

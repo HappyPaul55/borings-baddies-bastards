@@ -8,7 +8,7 @@ const outDir = path.join(root, "public", "icons");
 
 const response = await favicons(source, {
   path: "/icons",
-  appName: "Boring, Baddie & Bastards",
+  appName: "Borings, Baddies & Bastards",
   appShortName: "B3",
   appDescription:
     "A pass-the-phone social deduction party game for 3–20 players.",

@@ -1,4 +1,4 @@
-# Boring, Baddie & Bastards — B3
+# Borings, Baddies & Bastards — B3
 
 A free, pass-the-phone social deduction party game for 3–20 players, built with
 [Astro](https://astro.build) and [Tailwind CSS v4](https://tailwindcss.com), with a
