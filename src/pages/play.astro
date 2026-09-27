@@ -1,0 +1,65 @@
+---
+import { getEntry } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+import GameApp from "../components/game/GameApp.tsx";
+
+const site = (await getEntry("site", "main"))!.data;
+---
+
+<BaseLayout
+  title={`Play ${site.name} — a pass-the-phone party game`}
+  description={`Add ${site.playerMin}–${site.playerMax} players, pick a category and pass the phone. ${site.name} runs entirely in your browser — free, with no sign-up.`}
+  path="/play"
+  breadcrumbs={[
+    { name: "Home", path: "/" },
+    { name: "Play", path: "/play" },
+  ]}
+>
+  <main id="main">
+    <section
+      class="on-ink grid-ink border-b border-line-ink bg-ink pt-[clamp(6rem,13vw,8.5rem)] pb-[clamp(2.5rem,6vw,4rem)]"
+    >
+      <Container>
+        <p class="comment">
+          <span class="slash" aria-hidden="true">//</span> pass the phone
+        </p>
+        <h1
+          class="mt-4 font-display text-[clamp(2rem,5.5vw,3.4rem)] leading-[1] font-bold tracking-[-0.03em] text-cream"
+        >
+          {site.name}
+        </h1>
+        <p
+          class="mt-4 max-w-[42rem] text-[clamp(0.98rem,1.4vw,1.12rem)] leading-[1.6] text-[rgba(250,250,244,0.7)]"
+        >
+          {site.tagline}. Add {site.playerMin}–{site.playerMax} players, then pass
+          one phone around the group.
+        </p>
+      </Container>
+    </section>
+
+    <div class="grid-paper bg-paper py-[clamp(2.5rem,6vw,4rem)]">
+      <Container>
+        <noscript>
+          <p class="alert alert--info mb-6">
+            This game needs JavaScript to run. Please enable it to play — the
+            <a class="link-arrow" href="/rules">rules</a> are readable without it.
+          </p>
+        </noscript>
+
+        <GameApp
+          client:load
+          playerMin={site.playerMin}
+          playerMax={site.playerMax}
+        />
+
+        <p class="mt-8 max-w-[44rem] text-[0.85rem] text-muted">
+          Your game stays in this browser tab — no accounts, no cookies, no scores
+          saved anywhere. See the <a class="link-arrow" href="/privacy"
+            >privacy notice</a
+          >.
+        </p>
+      </Container>
+    </div>
+  </main>
+</BaseLayout>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="B3 — Boring, Baddie &amp; Bastards">
+  <rect width="64" height="64" rx="14" fill="#FFD400"/>
+  <text
+    x="32"
+    y="42"
+    text-anchor="middle"
+    fill="#0C0D0A"
+    stroke="#0C0D0A"
+    stroke-width="1"
+    stroke-linejoin="round"
+    font-family="'Space Grotesk','Segoe UI',ui-sans-serif,system-ui,sans-serif"
+    font-weight="700"
+    font-size="30"
+    letter-spacing="-1"
+  >B3</text>
+</svg>

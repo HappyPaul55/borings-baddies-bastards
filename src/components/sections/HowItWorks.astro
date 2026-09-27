@@ -1,0 +1,38 @@
+---
+import Container from "../ui/Container.astro";
+import { ROUND_STEPS } from "../../lib/game";
+---
+
+<section
+  id="how-it-works"
+  class="scroll-mt-24 border-b border-line bg-cream py-[clamp(3.5rem,9vw,7rem)]"
+>
+  <Container>
+    <p class="comment">
+      <span class="slash" aria-hidden="true">//</span> 02 · how a round runs
+    </p>
+    <h2
+      class="mt-4 max-w-[46rem] font-display text-[clamp(2rem,5vw,3.25rem)] leading-[1.02] font-bold tracking-[-0.03em]"
+    >
+      Six steps, then the phone goes round again.
+    </h2>
+
+    <ol class="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        ROUND_STEPS.map((step) => (
+          <li class="border-t border-line-strong pt-5">
+            <span class="font-mono text-[0.72rem] font-bold tracking-[0.18em] text-yellow-deep">
+              {step.index}
+            </span>
+            <h3 class="mt-2 font-display text-[1.25rem] font-bold tracking-[-0.01em]">
+              {step.title}
+            </h3>
+            <p class="mt-2 text-[0.96rem] leading-[1.6] text-ink-soft">
+              {step.body}
+            </p>
+          </li>
+        ))
+      }
+    </ol>
+  </Container>
+</section>

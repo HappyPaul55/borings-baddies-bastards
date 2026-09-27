@@ -1,0 +1,43 @@
+---
+import { getEntry } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+import Button from "../components/ui/Button.astro";
+
+const site = (await getEntry("site", "main"))!.data;
+---
+
+<BaseLayout
+  title={`Page not found — ${site.name}`}
+  description="That page could not be found. Head back to the homepage, or start a game."
+  path="/404"
+  noindex
+>
+  <main
+    id="main"
+    class="grid-paper pt-[calc(5.5rem+clamp(3rem,10vw,7rem))] pb-[clamp(4rem,10vw,7rem)]"
+  >
+    <Container>
+      <div class="max-w-[44rem]">
+        <p class="comment">
+          <span class="slash" aria-hidden="true">//</span> 404 · not found
+        </p>
+        <h1
+          class="mt-4 font-display text-[clamp(2.2rem,6vw,4rem)] leading-[1] font-bold tracking-[-0.03em]"
+        >
+          This round didn't <span class="mark">load</span>.
+        </h1>
+        <p class="mt-5 max-w-[34rem] text-[clamp(1rem,1.4vw,1.12rem)] text-ink-soft">
+          The link may be broken, or the page has moved. Head back home, or jump
+          straight into a game.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3.5">
+          <Button href="/" variant="primary">Back to home</Button>
+          <Button href="/play" variant="outline">
+            Play a game <span aria-hidden="true">→</span>
+          </Button>
+        </div>
+      </div>
+    </Container>
+  </main>
+</BaseLayout>

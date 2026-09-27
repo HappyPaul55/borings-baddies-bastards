@@ -1,0 +1,31 @@
+---
+import Container from "../ui/Container.astro";
+import Button from "../ui/Button.astro";
+---
+
+<section class="on-ink grid-ink border-b border-line-ink bg-ink py-[clamp(4rem,10vw,8rem)]">
+  <Container>
+    <div class="max-w-[54rem]">
+      <p class="comment">
+        <span class="slash" aria-hidden="true">//</span> ready when you are
+      </p>
+      <h2
+        class="mt-5 font-display text-[clamp(2.2rem,5.4vw,4rem)] leading-[1] font-bold tracking-[-0.035em] text-cream"
+      >
+        Grab a phone and <span class="mark">start lying</span>.
+      </h2>
+      <p
+        class="mt-5 max-w-[40rem] text-[clamp(1rem,1.4vw,1.15rem)] leading-[1.6] text-[rgba(250,250,244,0.7)]"
+      >
+        No installation, no sign-up, no cost. Pass the phone, pick a category and
+        let the accusations begin.
+      </p>
+      <div class="no-print mt-8 flex flex-wrap gap-3.5">
+        <Button href="/play" variant="primary">
+          Play now <span aria-hidden="true">→</span>
+        </Button>
+        <Button href="/rules" variant="outlineInk">Read the rules</Button>
+      </div>
+    </div>
+  </Container>
+</section>

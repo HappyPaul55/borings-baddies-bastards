@@ -1,0 +1,32 @@
+---
+interface Props {
+  class?: string;
+  size?: number;
+}
+
+const { class: className = "", size = 32 } = Astro.props;
+---
+
+<svg
+  class={className || undefined}
+  width={size}
+  height={size}
+  viewBox="0 0 64 64"
+  aria-hidden="true"
+  focusable="false"
+>
+  <rect width="64" height="64" rx="14" fill="#FFD400"></rect>
+  <text
+    x="32"
+    y="42"
+    text-anchor="middle"
+    fill="#0C0D0A"
+    stroke="#0C0D0A"
+    stroke-width="1"
+    stroke-linejoin="round"
+    font-family="'Space Grotesk','Segoe UI',ui-sans-serif,system-ui,sans-serif"
+    font-weight="700"
+    font-size="30"
+    letter-spacing="-1">B3</text
+  >
+</svg>

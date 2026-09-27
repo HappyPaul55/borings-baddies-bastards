@@ -1,0 +1,61 @@
+---
+import Container from "../ui/Container.astro";
+import { ROLES, SCORING } from "../../lib/game";
+
+const signed = (points: number) => `${points >= 0 ? "+" : ""}${points}`;
+---
+
+<section
+  id="scoring"
+  class="grid-paper scroll-mt-24 border-b border-line bg-paper py-[clamp(3.5rem,9vw,7rem)]"
+>
+  <Container>
+    <p class="comment">
+      <span class="slash" aria-hidden="true">//</span> 03 · scoring
+    </p>
+    <h2
+      class="mt-4 max-w-[46rem] font-display text-[clamp(2rem,5vw,3.25rem)] leading-[1.02] font-bold tracking-[-0.03em]"
+    >
+      Every vote counts — including the ones you don't cast.
+    </h2>
+    <p class="mt-5 max-w-[44rem] text-[clamp(1rem,1.4vw,1.12rem)] text-ink-soft">
+      Boring players are judged on every decision they make about every other
+      player, so it pays to be sure. Baddies want a quiet round; Bastards want
+      all the attention.
+    </p>
+
+    <div class="mt-10 grid gap-6 lg:grid-cols-3">
+      {
+        SCORING.map((group) => {
+          const role = ROLES[group.role];
+          return (
+            <div class={`panel card--${role.accent}`}>
+              <h3
+                class={`font-display text-[1.2rem] font-bold tracking-[-0.01em] role-${role.accent}`}
+              >
+                {group.heading}
+              </h3>
+              <table class="score-table">
+                <caption class="sr-only">{group.heading}</caption>
+                <tbody>
+                  {group.rows.map((row) => (
+                    <tr>
+                      <td>{row.label}</td>
+                      <td
+                        class={
+                          row.points >= 0 ? "delta-up" : "delta-down"
+                        }
+                      >
+                        {signed(row.points)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        })
+      }
+    </div>
+  </Container>
+</section>

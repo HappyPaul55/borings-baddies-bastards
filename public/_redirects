@@ -1,0 +1,7 @@
+# Cloudflare redirects
+# https://developers.cloudflare.com/workers/static-assets/redirects/
+#
+# The old game lived at the site root; the root is now a landing page and the
+# game is at /play. Nothing needs redirecting yet — add one line per redirect,
+# e.g.:
+# /old-path   /new-path   301

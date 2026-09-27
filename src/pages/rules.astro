@@ -1,0 +1,154 @@
+---
+import { getEntry } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+import Roles from "../components/sections/Roles.astro";
+import HowItWorks from "../components/sections/HowItWorks.astro";
+import Scoring from "../components/sections/Scoring.astro";
+import Cta from "../components/sections/Cta.astro";
+
+const site = (await getEntry("site", "main"))!.data;
+
+const tips = [
+  {
+    title: "Keep categories broad",
+    body: "“Animals” gives the word service plenty to work with. “Obscure 1990s Lithuanian films” does not. If a category comes back empty, try something more common.",
+  },
+  {
+    title: "Listen for the bluff",
+    body: "Baddies have never seen the word, so they talk around it. Bastards have seen it and will happily sound suspicious. The skill is telling the two apart.",
+  },
+  {
+    title: "Vote — abstaining isn't free",
+    body: "Boring players lose 2 points for every Baddie they leave unvoted. Voting for everyone is just as costly, so spend your votes where it counts.",
+  },
+  {
+    title: "Pass the phone carefully",
+    body: "The reveal screen is one tap away from exposing a role. Keep the phone to yourself until the next player's name comes up, then hand it over.",
+  },
+];
+
+const faqs = [
+  {
+    q: "How many people can play?",
+    a: `Between ${site.playerMin} and ${site.playerMax} players, on a single phone that gets passed around.`,
+  },
+  {
+    q: "Do we each need a device?",
+    a: "No. One phone is enough — it is passed from player to player for the role reveal and again for voting.",
+  },
+  {
+    q: "Is there anything to install?",
+    a: "No. The game runs in any modern browser and there is no account, no download and no cost.",
+  },
+  {
+    q: "Why did the role counts change after I set them?",
+    a: "Boring players must always be the strict majority, so the game trims the number of Baddies and Bastards if your minimums and maximums would let them take over. The results screen tells you when that happens.",
+  },
+  {
+    q: "What if the words don't load?",
+    a: "The game fetches words for the category you type from a third-party word service. If it fails, choose “Try again”, or pick a broader category. Nothing else in the round depends on it.",
+  },
+  {
+    q: "Does the game save my progress?",
+    a: "No. Player names, scores and roles live only in the open browser tab. Close or reload the page and the game resets.",
+  },
+];
+---
+
+<BaseLayout
+  title={`Rules & scoring — ${site.name}`}
+  description={`How to play ${site.name}: the three roles, the round flow, the voting rules and the scoring table, in plain English.`}
+  path="/rules"
+  breadcrumbs={[
+    { name: "Home", path: "/" },
+    { name: "Rules", path: "/rules" },
+  ]}
+>
+  <main id="main">
+    <section
+      class="on-ink grid-ink border-b border-line-ink bg-ink pt-[clamp(6rem,13vw,8.5rem)] pb-[clamp(2.5rem,6vw,4rem)]"
+    >
+      <Container>
+        <p class="comment">
+          <span class="slash" aria-hidden="true">//</span> the rulebook
+        </p>
+        <h1
+          class="mt-4 max-w-[20ch] font-display text-[clamp(2.1rem,5.8vw,3.6rem)] leading-[1] font-bold tracking-[-0.03em] text-cream"
+        >
+          How to play <span class="mark">Boring, Baddie &amp; Bastards</span>
+        </h1>
+        <p
+          class="mt-5 max-w-[46rem] text-[clamp(1rem,1.4vw,1.15rem)] leading-[1.6] text-[rgba(250,250,244,0.7)]"
+        >
+          A social deduction game for {site.playerMin}–{site.playerMax} players
+          on one phone. Everyone shares a word — except the Baddies — and the
+          group has to work out who is faking it before the votes are counted.
+        </p>
+      </Container>
+    </section>
+
+    <Roles />
+    <HowItWorks />
+    <Scoring />
+
+    <section class="border-b border-line bg-cream py-[clamp(3.5rem,9vw,7rem)]">
+      <Container>
+        <p class="comment">
+          <span class="slash" aria-hidden="true">//</span> 04 · house rules
+        </p>
+        <h2
+          class="mt-4 max-w-[46rem] font-display text-[clamp(2rem,5vw,3.25rem)] leading-[1.02] font-bold tracking-[-0.03em]"
+        >
+          A few things that make a round better.
+        </h2>
+        <div class="mt-10 grid gap-6 sm:grid-cols-2">
+          {
+            tips.map((tip, index) => (
+              <div class="border-t border-line-strong pt-5">
+                <span class="font-mono text-[0.72rem] font-bold tracking-[0.18em] text-yellow-deep">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3 class="mt-2 font-display text-[1.2rem] font-bold">
+                  {tip.title}
+                </h3>
+                <p class="mt-2 text-[0.96rem] leading-[1.6] text-ink-soft">
+                  {tip.body}
+                </p>
+              </div>
+            ))
+          }
+        </div>
+      </Container>
+    </section>
+
+    <section class="grid-paper border-b border-line bg-paper py-[clamp(3.5rem,9vw,7rem)]">
+      <Container>
+        <p class="comment">
+          <span class="slash" aria-hidden="true">//</span> 05 · questions
+        </p>
+        <h2
+          class="mt-4 font-display text-[clamp(2rem,5vw,3.25rem)] leading-[1.02] font-bold tracking-[-0.03em]"
+        >
+          Frequently asked
+        </h2>
+        <dl class="mt-10 max-w-[52rem] divide-y divide-line border-t border-line-strong">
+          {
+            faqs.map((item) => (
+              <div class="grid gap-2 py-5 sm:grid-cols-[16rem_1fr] sm:gap-8">
+                <dt class="font-display font-bold tracking-[-0.01em]">
+                  {item.q}
+                </dt>
+                <dd class="text-[0.96rem] leading-[1.6] text-ink-soft">
+                  {item.a}
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </Container>
+    </section>
+
+    <Cta />
+  </main>
+</BaseLayout>

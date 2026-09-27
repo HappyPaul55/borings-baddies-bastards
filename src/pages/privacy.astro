@@ -1,0 +1,54 @@
+---
+import { getEntry, render } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Container from "../components/ui/Container.astro";
+
+const site = (await getEntry("site", "main"))!.data;
+const entry = await getEntry("legal", "privacy");
+
+if (!entry) {
+  throw new Error("Missing privacy notice (legal/privacy).");
+}
+
+const { Content } = await render(entry);
+---
+
+<BaseLayout
+  title={`${entry.data.title} — ${site.name}`}
+  description={entry.data.description}
+  path="/privacy"
+  breadcrumbs={[
+    { name: "Home", path: "/" },
+    { name: "Privacy", path: "/privacy" },
+  ]}
+>
+  <main id="main">
+    <section
+      class="on-ink grid-ink border-b border-line-ink bg-ink pt-[clamp(6rem,13vw,8.5rem)] pb-[clamp(2.5rem,6vw,4rem)]"
+    >
+      <Container>
+        <p class="comment">
+          <span class="slash" aria-hidden="true">//</span> legal
+        </p>
+        <h1
+          class="mt-4 font-display text-[clamp(2rem,5.5vw,3.4rem)] leading-[1] font-bold tracking-[-0.03em] text-cream"
+        >
+          {entry.data.title}
+        </h1>
+        <p
+          class="mt-4 font-mono text-[0.72rem] font-bold tracking-[0.1em] text-[rgba(250,250,244,0.6)] uppercase"
+        >
+          Last updated {entry.data.updated}
+        </p>
+      </Container>
+    </section>
+
+    <div class="grid-paper bg-paper py-[clamp(3rem,8vw,5.5rem)]">
+      <Container>
+        <article class="legal">
+          <Content />
+        </article>
+      </Container>
+    </div>
+  </main>
+</BaseLayout>

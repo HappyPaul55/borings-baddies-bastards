@@ -1,0 +1,17 @@
+---
+interface Props {
+  class?: string;
+  as?: keyof HTMLElementTagNameMap;
+  wide?: boolean;
+}
+
+const { class: className = "", as: Tag = "div", wide = false } = Astro.props;
+
+const width = wide
+  ? "w-[min(1320px,100%-2.5rem)]"
+  : "w-[min(1160px,100%-2.5rem)]";
+---
+
+<Tag class={`mx-auto ${width} ${className}`}>
+  <slot />
+</Tag>
