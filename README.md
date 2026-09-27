@@ -201,5 +201,3 @@ before anything else that collects personal data is added.
 The game is released under the **GNU Affero General Public License v3.0** — see
 `LICENSE`. The licence is linked from the site footer and recorded in
 `settings.json` (`license`, `licenseUrl`).
-
-`GUIDE.md` in the repository root is the build guide this site was produced against.
