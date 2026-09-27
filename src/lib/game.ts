@@ -123,7 +123,7 @@ export const ROUND_STEPS: RoundStep[] = [
   {
     index: "01",
     title: "Set up",
-    body: "Add every player by name — 3 to 10 of them — then set how many Baddies and Bastards are allowed.",
+    body: "Add every player by name — 3 to 20 of them — then set how many Baddies and Bastards are allowed.",
   },
   {
     index: "02",

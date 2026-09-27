@@ -11,7 +11,7 @@ const response = await favicons(source, {
   appName: "Boring, Baddie & Bastards",
   appShortName: "B3",
   appDescription:
-    "A pass-the-phone social deduction party game for 3–10 players.",
+    "A pass-the-phone social deduction party game for 3–20 players.",
   developerName: "HappyPaul55",
   background: "#0C0D0A",
   theme_color: "#0C0D0A",

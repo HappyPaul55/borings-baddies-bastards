@@ -1,6 +1,6 @@
 # Boring, Baddie & Bastards — B3
 
-A free, pass-the-phone social deduction party game for 3–10 players, built with
+A free, pass-the-phone social deduction party game for 3–20 players, built with
 [Astro](https://astro.build) and [Tailwind CSS v4](https://tailwindcss.com), with a
 [React](https://react.dev) island for the game itself and a small Cloudflare Worker
 that generates the secret word via an AI model.

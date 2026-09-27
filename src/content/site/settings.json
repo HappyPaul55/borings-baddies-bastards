@@ -4,7 +4,7 @@
     "name": "Boring, Baddie & Bastards",
     "shortName": "B3",
     "tagline": "A pass-the-phone social deduction game",
-    "description": "A free browser party game for 3–10 players. One phone gets passed around the group while everyone scrambles to work out who is Boring, who is a Baddie and who is a Bastard.",
+    "description": "A free browser party game for 3–20 players. One phone gets passed around the group while everyone scrambles to work out who is Boring, who is a Baddie and who is a Bastard.",
     "url": "https://b3.happypaul55.com",
     "author": "HappyPaul55",
     "authorUrl": "https://www.happypaul55.com",
@@ -12,6 +12,6 @@
     "license": "AGPL-3.0",
     "licenseUrl": "https://www.gnu.org/licenses/agpl-3.0.html",
     "playerMin": 3,
-    "playerMax": 10
+    "playerMax": 20
   }
 ]
