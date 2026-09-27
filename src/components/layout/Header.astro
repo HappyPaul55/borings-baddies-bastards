@@ -9,7 +9,10 @@ interface Props {
 
 const { settings } = Astro.props;
 
-const nav = [{ href: "/rules", label: "Rules" }];
+const nav = [
+  { href: "/rules", label: "Rules" },
+  { href: "/privacy", label: "Privacy" },
+];
 
 // `build.format: "file"` means Astro.url.pathname is /play.html at build time,
 // while the served URL is extensionless. Normalise both sides before comparing.
