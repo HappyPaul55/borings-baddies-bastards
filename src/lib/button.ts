@@ -6,7 +6,7 @@
 export type ButtonVariant = "primary" | "outline" | "outlineInk";
 
 const base =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] px-[1.2rem] py-[0.8rem] font-mono text-[0.76rem] font-bold uppercase tracking-[0.1em] transition-[transform,background-color,border-color,box-shadow,color] duration-200 ease-brand disabled:cursor-not-allowed disabled:opacity-55";
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[6px] px-[1.2rem] py-[0.8rem] font-mono text-[0.76rem] font-bold uppercase tracking-[0.1em] transition-[transform,background-color,border-color,box-shadow,color] duration-200 ease-brand disabled:cursor-not-allowed disabled:opacity-55";
 
 const variants: Record<ButtonVariant, string> = {
   primary:
