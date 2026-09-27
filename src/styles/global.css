@@ -435,6 +435,17 @@
     max-width: 44rem;
     margin-inline: auto;
   }
+  /* Only the game shell goes fullscreen, so the header and footer stay out.
+     Fill the viewport and keep the paper backdrop on wider phones. */
+  .game-shell:fullscreen {
+    max-width: none;
+    padding: clamp(1rem, 5vw, 2rem);
+    background: var(--color-paper);
+    overflow-y: auto;
+  }
+  .game-shell:fullscreen::backdrop {
+    background: var(--color-paper);
+  }
 
   .phase-badge {
     display: flex;

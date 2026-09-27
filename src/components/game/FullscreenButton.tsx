@@ -6,7 +6,9 @@ import { Button } from "./Button";
  * group passes around). Hidden entirely when the browser cannot fullscreen an
  * element — most notably iOS Safari, which only supports fullscreen on media.
  *
- * Rendered above the phase badge so it is the first control in the shell.
+ * It fullscreens the `#game` shell rather than the document, so the site header
+ * and footer stay out of the way. Rendered above the phase badge so it is the
+ * first control in the shell (and stays reachable to exit fullscreen).
  */
 export function FullscreenButton() {
   const [supported, setSupported] = useState(false);
@@ -30,7 +32,9 @@ export function FullscreenButton() {
       if (document.fullscreenElement) {
         await document.exitFullscreen();
       } else {
-        await document.documentElement.requestFullscreen();
+        const target =
+          document.getElementById("game") ?? document.documentElement;
+        await target.requestFullscreen();
       }
     } catch {
       // The browser can reject a request (e.g. without a user gesture); the
