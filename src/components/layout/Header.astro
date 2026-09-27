@@ -9,10 +9,7 @@ interface Props {
 
 const { settings } = Astro.props;
 
-const nav = [
-  { href: "/play", label: "Play" },
-  { href: "/rules", label: "Rules" },
-];
+const nav = [{ href: "/rules", label: "Rules" }];
 
 // `build.format: "file"` means Astro.url.pathname is /play.html at build time,
 // while the served URL is extensionless. Normalise both sides before comparing.
@@ -54,11 +51,8 @@ const current = (href: string) => (isActive(href) ? "page" : undefined);
           </a>
         ))
       }
-      <a
-        class="nav-pill"
-        href={settings.repo}
-        target="_blank"
-        rel="noopener noreferrer">GitHub ↗</a
+      <a class="nav-pill" href="/play" aria-current={current("/play")}
+        >Play</a
       >
     </nav>
 
@@ -86,11 +80,8 @@ const current = (href: string) => (isActive(href) ? "page" : undefined);
             </a>
           ))
         }
-        <a
-          class="nav-pill"
-          href={settings.repo}
-          target="_blank"
-          rel="noopener noreferrer">GitHub ↗</a
+        <a class="nav-pill" href="/play" aria-current={current("/play")}
+          >Play</a
         >
       </nav>
     </details>
