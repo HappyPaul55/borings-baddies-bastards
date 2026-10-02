@@ -146,7 +146,7 @@ Only `/play` ships JavaScript; the other pages stay static and script-free
 
 - Deployed as a **Cloudflare Worker with static assets** via Workers Builds
   (`bun run build` → `bunx wrangler deploy`), configured by `wrangler.jsonc`
-  (`name: borings-baddies-bastards`, `main: worker/index.ts`, `assets.directory:
+  (`name: client-b3-happypaul55-com`, `main: worker/index.ts`, `assets.directory:
   ./dist`, `assets.binding: ASSETS`, `run_worker_first: ["/api/*"]`).
 - Set `AI_API_KEY` (secret) and `AI_ENDPOINT` / `AI_MODEL` before the first deploy.
 - `site` is `https://b3.happypaul55.com`; keep `astro.config.mjs`,

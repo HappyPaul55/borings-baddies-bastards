@@ -1,5 +1,8 @@
 {
-  "name": "borings-baddies-bastards",
+  // Must match the connected Cloudflare Worker name, which Workers Builds
+  // supplies as the CI worker name; a mismatch is overridden at deploy time and
+  // logged as a warning.
+  "name": "client-b3-happypaul55-com",
   "main": "worker/index.ts",
   "compatibility_date": "2026-09-26",
   // Custom domains are managed in the Cloudflare dashboard. Explicitly disable the
