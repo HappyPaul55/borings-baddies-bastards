@@ -5,6 +5,11 @@
   "name": "client-b3-happypaul55-com",
   "main": "worker/index.ts",
   "compatibility_date": "2026-09-26",
+  // Comma-separated hostnames accepted from Turnstile siteverify. Production
+  // only — local dev sets its own list (with localhost) in `.env`.
+  "vars": {
+    "TURNSTILE_HOSTNAMES": "b3.happypaul55.com"
+  },
   // Custom domains are managed in the Cloudflare dashboard. Explicitly disable the
   // workers.dev route and version preview URLs so neither is re-enabled on deploy.
   "workers_dev": false,

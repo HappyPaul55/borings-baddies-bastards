@@ -23,6 +23,7 @@ The site is **B3** (`b3.happypaul55.com`); the full game name is set in
 | `/privacy` | Privacy notice (rendered from `src/content/legal/privacy.md`)     |
 | `/404`     | Not found — `noindex` and excluded from the sitemap               |
 | `/api/words` | GET · generates words for a category (server-side, see below)   |
+| `/api/session` | GET/POST · Turnstile human check → 30-minute session (see below) |
 
 ## Local development
 
@@ -42,9 +43,11 @@ Requires Node.js 20+ and [Bun](https://bun.sh). Use `bun` (never `npm`) and `bun
 `yarn.lock` or `pnpm-lock.yaml`. There is no linter; the gates are `bun run check`,
 `bun test` and `bun run build`.
 
-`astro dev` serves `/api/words` itself, using the same handler the Worker runs in
-production, reading `.env`. Without `AI_ENDPOINT`/`AI_API_KEY` the game still runs
-and simply shows the "word service unavailable" state when a round starts.
+`astro dev` serves `/api/words` and `/api/session` itself, using the same handlers
+the Worker runs in production, reading `.env`. Without `AI_ENDPOINT`/`AI_API_KEY`
+the game still runs and simply shows the "word service unavailable" state when a
+round starts. Without `TURNSTILE_SECRET`/`TURNSTILE_HOSTNAMES` the game refuses to
+start (the human check fails closed).
 
 ## Tests
 
@@ -89,6 +92,35 @@ For local development put them in `.env` (git-ignored); for `wrangler dev` use
 `.dev.vars`; in production set `AI_API_KEY` as a secret and the others as Worker
 vars.
 
+## Human check (Cloudflare Turnstile)
+
+Because every round calls the AI model, `/api/words` is gated behind a
+**Cloudflare Turnstile** check. Turnstile tokens are single-use and expire in
+minutes, so the check is *not* repeated per round. Instead:
+
+1. When `/play` opens, the React island asks the worker for a session
+   (`GET /api/session`) and, if there is none, renders the Turnstile widget.
+2. On success the widget token is sent to `POST /api/session`, which runs
+   canonical **siteverify** (`success`, `action: "open"` and an allowed
+   `hostname`), then returns a signed session token valid for **30 minutes**.
+3. The browser keeps that token in `sessionStorage` and sends it as
+   `x-turnstile-session` on every `/api/words` call. `/api/words` returns
+   `401 { code: "turnstile_required" }` when the session is missing or has
+   expired, and the gate reappears.
+
+The session is an HMAC-SHA256 token over its own expiry, keyed by a derivation of
+`TURNSTILE_SECRET`; there is no session database. The browser **never** calls
+siteverify.
+
+| Variable                    | Required | Notes                                                                 |
+| --------------------------- | -------- | --------------------------------------------------------------------- |
+| `PUBLIC_TURNSTILE_SITEKEY`  | no       | Public widget site key; baked in at build time, literal fallback in code |
+| `TURNSTILE_HOSTNAMES`       | yes      | Comma-separated hostnames accepted from siteverify. Production sets this in `wrangler.jsonc`; local dev uses `localhost,127.0.0.1` |
+| `TURNSTILE_SECRET`          | yes      | Secret. `wrangler secret put TURNSTILE_SECRET` in production           |
+
+Production must never include `localhost` or `127.0.0.1` in `TURNSTILE_HOSTNAMES`.
+The widget itself must be registered for each hostname that serves it.
+
 ## Deployment
 
 The site is static assets plus a small Worker, deployed to **Cloudflare Workers**
@@ -115,7 +147,8 @@ Set production secrets before the first deploy:
 
 ```bash
 bunx wrangler secret put AI_API_KEY
-# and AI_ENDPOINT / AI_MODEL as vars or secrets
+bunx wrangler secret put TURNSTILE_SECRET
+# and AI_ENDPOINT / AI_MODEL as vars or secrets; TURNSTILE_HOSTNAMES is a var in wrangler.jsonc
 ```
 
 ## Content and code layout
@@ -131,6 +164,7 @@ bunx wrangler secret put AI_API_KEY
 | React game island (views, one per phase)           | `src/components/game/*.tsx`            |
 | `/play` page shell that mounts the island          | `src/pages/play.astro`                 |
 | Word service: client / handler / prompt+parse      | `src/lib/words.ts` · `words-api.ts` · `word-source.ts` |
+| Human check: server module / browser client / gate | `src/lib/turnstile.ts` · `src/lib/turnstile-client.ts` · `src/components/game/TurnstileGate.tsx` |
 | Worker entry (Worker + static assets)              | `worker/index.ts`                      |
 | Privacy notice                                    | `src/content/legal/privacy.md`         |
 | Zod schemas for the two collections               | `src/content.config.ts`                |
@@ -164,11 +198,13 @@ interface; the components should not need to change.
 
 ## Privacy
 
-The game has no accounts, no cookies, no analytics and no server-side storage. The
-only data that leaves the browser is the category a player types, which is sent to
-this site's own `/api/words` endpoint and then to the configured AI provider to
-generate words. `src/content/legal/privacy.md` explains this and must be updated
-before anything else that collects personal data is added.
+The game has no accounts, no cookies of its own, no analytics and no server-side
+storage. The only data that leaves the browser is the category a player types,
+which is sent to this site's own `/api/words` endpoint and then to the configured
+AI provider to generate words. Opening `/play` also runs a Cloudflare Turnstile
+human check (IP address and standard request details) to protect that endpoint.
+`src/content/legal/privacy.md` explains this and must be updated before anything
+else that collects personal data is added.
 
 ## Icons and fonts
 
@@ -192,8 +228,9 @@ before anything else that collects personal data is added.
 - `sitemap-index.xml` (via `@astrojs/sitemap`) and `robots.txt`; the 404 is
   `noindex` and excluded from the sitemap.
 - `public/_headers` sets security headers (CSP, HSTS, `nosniff`, frame denial) and
-  long-lived caching. The CSP is `connect-src 'self'` — the browser only ever talks
-  to this origin; the AI call happens server-side.
+  long-lived caching. The CSP keeps `connect-src`/`frame-src`/`script-src` scoped
+  to this origin plus `https://challenges.cloudflare.com` for the Turnstile
+  widget; the AI call still happens server-side.
 - `public/_redirects` is present and empty (no legacy URLs yet).
 
 ## Licence

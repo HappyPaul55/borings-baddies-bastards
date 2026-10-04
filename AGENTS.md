@@ -54,7 +54,12 @@ lockfile is `bun.lock`; do not add `package-lock.json`, `yarn.lock` or
 - `src/lib/words-api.ts` — the `/api/words` HTTP handler and `resolveWordEnv`. Used
   by both `worker/index.ts` and the dev plugin in `astro.config.mjs`.
 - `src/lib/words.ts` — the browser client for `/api/words`; typed `WordApiError`
-  kinds (`network` / `server` / `format` / `empty`).
+  kinds (`network` / `server` / `format` / `empty` / `turnstile`).
+- `src/lib/turnstile.ts` — canonical Turnstile siteverify plus the signed,
+  HMAC-based 30-minute session token. `src/lib/turnstile-client.ts` is the browser
+  half (sessionStorage + widget loader); `src/lib/turnstile-shared.ts` holds the
+  action, header name and TTL shared by both. `worker/index.ts` guards
+  `/api/words` with it and serves `/api/session`.
 - `worker/index.ts` — the Worker entry. Serves `/api/words` and otherwise
   `env.ASSETS.fetch(request)`. Types are declared inline on purpose (see gotchas).
 - `src/components/game/*.tsx` — the React island. `GameApp.tsx` is the root;
@@ -123,9 +128,10 @@ Only `/play` ships JavaScript; the other pages stay static and script-free
   `index.html` / `play.html` / etc.; canonical and sitemap URLs have no trailing
   slash. Active-nav logic in `Header.astro` normalises both `.html` and trailing
   slashes. Check `aria-current` in `dist/*.html`, not just in dev.
-- **CSP is `connect-src 'self'`.** The browser only talks to this origin; the AI
-  call happens in the Worker. If you ever call a third party from the browser,
-  extend `public/_headers`.
+- **CSP is `connect-src 'self'`** plus `https://challenges.cloudflare.com` for the
+  Turnstile widget (`script-src`, `connect-src` and `frame-src`). The browser only
+  otherwise talks to this origin; the AI call happens in the Worker. If you ever
+  call another third party from the browser, extend `public/_headers`.
 - **`run_worker_first: ["/api/*"]` needs Wrangler ≥ 4.20.0**, and
   `assets.binding: "ASSETS"` must be set for `env.ASSETS.fetch` to work.
 - `worker/index.ts` declares its `Env` type inline instead of using
@@ -135,6 +141,11 @@ Only `/play` ships JavaScript; the other pages stay static and script-free
 - The site collects **no personal data**, but the category a player types is sent
   server-side and on to the AI provider. Keep `src/content/legal/privacy.md` in step
   with anything new.
+- **`/api/words` requires the `x-turnstile-session` header**; the Worker returns
+  `401 { code: "turnstile_required" }` without a valid one and the client re-shows
+  `TurnstileGate`. The session is issued by `POST /api/session` after siteverify and
+  lasts 30 minutes. `resolveTurnstileEnv` fails closed when `TURNSTILE_SECRET` or
+  `TURNSTILE_HOSTNAMES` is missing.
 - Icons are generated with the `favicons` package (`bun run icons`), not hand-made.
   `brand-mark.svg` is the source of truth for the wordmark and favicons.
 - TypeScript is on 6.x: `astro check` refuses TypeScript 7 (`@astrojs/check` peer

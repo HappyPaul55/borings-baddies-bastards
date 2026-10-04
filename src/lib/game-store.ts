@@ -109,6 +109,8 @@ export interface GameSnapshot {
   error: string | null;
   /** A word-service failure, shown with retry / change-category actions. */
   wordError: string | null;
+  /** True when the Turnstile session is missing or has expired. */
+  verificationRequired: boolean;
 }
 
 /** The contract the UI depends on. A multiplayer room client will implement this too. */
@@ -123,6 +125,7 @@ export interface GameClient {
   start(): void;
   fetchWords(category: string): void;
   dismissWordError(): void;
+  dismissVerification(): void;
   beginPassing(): void;
   reveal(): void;
   advancePassing(): void;
@@ -168,6 +171,7 @@ export class Game implements GameClient {
   private loading = false;
   private error: string | null = null;
   private wordError: string | null = null;
+  private verificationRequired = false;
 
   private readonly listeners = new Set<() => void>();
   private snapshot: GameSnapshot;
@@ -261,6 +265,7 @@ export class Game implements GameClient {
       loading: this.loading,
       error: this.error,
       wordError: this.wordError,
+      verificationRequired: this.verificationRequired,
     };
   }
 
@@ -329,6 +334,7 @@ export class Game implements GameClient {
     this.roles = {};
     this.revealView = null;
     this.wordError = null;
+    this.verificationRequired = false;
     this.loading = false;
     this.error = null;
     this.emit();
@@ -359,16 +365,27 @@ export class Game implements GameClient {
     } catch (error) {
       if (request !== this.wordRequest) return;
       this.loading = false;
-      this.wordError =
-        error instanceof WordApiError
-          ? error.message
-          : "Something went wrong fetching words. Please try again.";
+
+      if (error instanceof WordApiError && error.kind === "turnstile") {
+        // The challenge window lapsed; the gate will collect a new one.
+        this.verificationRequired = true;
+      } else {
+        this.wordError =
+          error instanceof WordApiError
+            ? error.message
+            : "Something went wrong fetching words. Please try again.";
+      }
       this.emit();
     }
   }
 
   dismissWordError(): void {
     this.wordError = null;
+    this.emit();
+  }
+
+  dismissVerification(): void {
+    this.verificationRequired = false;
     this.emit();
   }
 
@@ -496,6 +513,7 @@ export class Game implements GameClient {
     this.summary = null;
     this.error = null;
     this.wordError = null;
+    this.verificationRequired = false;
     this.loading = false;
     this.emit();
   }

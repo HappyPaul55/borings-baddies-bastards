@@ -6,8 +6,14 @@
  * the UI can offer the right recovery: "try again" for a flaky network,
  * "choose a different category" when a topic returns nothing.
  */
+import { clearTurnstileSession, turnstileHeaders } from "./turnstile-client";
 
-export type WordApiErrorKind = "network" | "server" | "format" | "empty";
+export type WordApiErrorKind =
+  | "network"
+  | "server"
+  | "format"
+  | "empty"
+  | "turnstile";
 
 export class WordApiError extends Error {
   readonly kind: WordApiErrorKind;
@@ -33,7 +39,7 @@ export async function fetchWords(
   try {
     response = await fetch(url, {
       method: "GET",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...turnstileHeaders() },
       signal,
     });
   } catch (error) {
@@ -43,6 +49,14 @@ export async function fetchWords(
     throw new WordApiError(
       "network",
       "Could not reach the word service. Check your connection and try again.",
+    );
+  }
+
+  if (response.status === 401) {
+    clearTurnstileSession();
+    throw new WordApiError(
+      "turnstile",
+      "Please complete the human check to keep playing.",
     );
   }
 

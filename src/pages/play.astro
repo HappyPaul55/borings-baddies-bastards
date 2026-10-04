@@ -5,6 +5,11 @@ import Container from "../components/ui/Container.astro";
 import GameApp from "../components/game/GameApp.tsx";
 
 const site = (await getEntry("site", "main"))!.data;
+
+// Public Turnstile site key. Site keys are public, so the literal is a safe
+// fallback for builds that do not set the env var.
+const turnstileSiteKey =
+  import.meta.env.PUBLIC_TURNSTILE_SITEKEY ?? "0x4AAAAAAFN0kO3hNISxwO9T";
 ---
 
 <BaseLayout
@@ -51,6 +56,7 @@ const site = (await getEntry("site", "main"))!.data;
           client:load
           playerMin={site.playerMin}
           playerMax={site.playerMax}
+          turnstileSiteKey={turnstileSiteKey}
         />
 
         <p class="mt-8 max-w-[44rem] text-[0.85rem] text-muted">

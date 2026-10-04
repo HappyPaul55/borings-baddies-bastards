@@ -1,7 +1,7 @@
 ---
 title: Privacy Policy
-description: How Borings, Baddies & Bastards handles information when you play. No accounts, no cookies, no analytics.
-updated: "2026-09-27"
+description: How Borings, Baddies & Bastards handles information when you play. No accounts, no analytics, no advertising.
+updated: "2026-10-04"
 ---
 
 Borings, Baddies & Bastards is a free browser game. It has no accounts, no
@@ -20,7 +20,9 @@ anything described below. You can contact the controller through
 We do not ask for, store or share any personal information. In particular:
 
 - There is no sign-up, login or account of any kind.
-- We set no cookies and use no analytics, trackers or advertising pixels.
+- We set no cookies of our own and use no analytics, trackers or advertising
+  pixels. (A Cloudflare Turnstile check, described below, runs when you open the
+  game.)
 - Player names you type are used only in your browser for the duration of your
   visit. They are never sent to us and are gone as soon as you close or reload
   the page.
@@ -44,9 +46,20 @@ If you would prefer not to make this request, simply do not start a round — th
 rest of the page works without it, and nothing is sent until you choose to fetch
 words.
 
+## Keeping the word service free
+
+The word service costs money each time it runs, so it could be abused by bots.
+Before you start playing, **Cloudflare Turnstile** checks that you are a person.
+Cloudflare sees your IP address and the standard technical details of the
+request in order to make that check. If you pass, your browser stores a signed
+token in `sessionStorage` that lasts for **30 minutes**, so a whole game needs
+only one check; the check appears again after that, or when the tab is closed.
+We do not store the token result on our servers, and it is not linked to you.
+
 ## Third parties
 
-- **Cloudflare** hosts the game and runs the word-generation endpoint.
+- **Cloudflare** hosts the game, runs the word-generation endpoint, and provides
+  the Turnstile human check.
 - An **AI model provider** receives the category text you type, in order to
   generate the word list.
 
