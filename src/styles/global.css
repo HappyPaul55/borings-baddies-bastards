@@ -841,6 +841,12 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+  /* A spinner is essential progress feedback, so keep it turning (a little
+     slower) instead of freezing it mid-rotation. */
+  .spinner {
+    animation-duration: 1.4s !important;
+    animation-iteration-count: infinite !important;
+  }
 }
 
 /* ------------------------------------------------------------------
