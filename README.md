@@ -84,8 +84,8 @@ There are two sources, in order:
 1. **Cloudflare Workers AI binding** (`env.AI`) — the default. It is configured by
    the `ai` block in `wrangler.jsonc` and needs no secret, so production works out
    of the box. The model is chosen with the `WORKERS_AI_MODEL` var (set in
-   `wrangler.jsonc`, currently `@cf/zai-org/glm-4.7-flash`, one of Cloudflare's
-   recommended text-generation models); if it is unset, a default in
+   `wrangler.jsonc`, currently `@cf/meta/llama-3.1-8b-instruct-fast`, one of
+   Cloudflare's stable text-generation models); if it is unset, a default in
    `src/lib/word-source.ts` is used.
 2. **OpenAI-compatible endpoint** — an optional fallback, used when the binding is
    absent (local `astro dev`) or the binding call fails. Configured entirely via

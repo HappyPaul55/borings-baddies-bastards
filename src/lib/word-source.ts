@@ -54,10 +54,12 @@ const DEFAULT_MODEL = "gpt-4o-mini";
 
 /**
  * Last-resort Workers AI model, used only when `WORKERS_AI_MODEL` is not set.
- * Chosen from Cloudflare's current recommended text-generation replacements;
- * set `WORKERS_AI_MODEL` in wrangler.jsonc to use a different model.
+ * Must be a plain instruct model that returns the answer in `content` — reasoning
+ * models (for example `@cf/zai-org/glm-4.7-flash`) spend the token budget on a
+ * hidden reasoning trace and return empty `content`, which yields no words.
+ * Set `WORKERS_AI_MODEL` in wrangler.jsonc to use a different model.
  */
-const DEFAULT_WORKERS_AI_MODEL = "@cf/zai-org/glm-4.7-flash";
+const DEFAULT_WORKERS_AI_MODEL = "@cf/meta/llama-3.1-8b-instruct-fast";
 
 const SYSTEM_PROMPT =
   "You generate short word lists for a social deduction party game.";

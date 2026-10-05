@@ -88,8 +88,8 @@ and returns **up to 5**; the client picks one at random.
 The primary source is the **Cloudflare Workers AI binding** (`env.AI`), configured
 by the `ai` block in `wrangler.jsonc`; it needs no secret. The model comes from the
 `WORKERS_AI_MODEL` var (set in `wrangler.jsonc`, defaulting to
-`@cf/zai-org/glm-4.7-flash` in `word-source.ts` — update it there or via the var if
-the catalog moves on).
+`@cf/meta/llama-3.1-8b-instruct-fast` in `word-source.ts` — update it there or via
+the var if the catalog moves on; it must be a non-reasoning instruct model).
 The OpenAI-compatible endpoint is a **fallback** only, used when the binding is
 absent (local `astro dev`) or fails. Fallback env vars: `AI_ENDPOINT` and
 `AI_API_KEY` (both optional), `AI_MODEL` (optional, defaults to `gpt-4o-mini`).
