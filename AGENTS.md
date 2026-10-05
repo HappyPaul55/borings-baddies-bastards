@@ -48,11 +48,12 @@ lockfile is `bun.lock`; do not add `package-lock.json`, `yarn.lock` or
   `GameClient` interface and `GameSnapshot`. Publishes an immutable snapshot via
   `subscribe` / `getSnapshot` (consumed with `useSyncExternalStore`). A future
   WebSocket room client implements the same `GameClient` interface.
-- `src/lib/word-source.ts` — the AI prompt, `parseWords` and `generateWords`. Drops
-  the first word and caps at five. Runtime-free so the Worker and dev server share
-  it.
-- `src/lib/words-api.ts` — the `/api/words` HTTP handler and `resolveWordEnv`. Used
-  by both `worker/index.ts` and the dev plugin in `astro.config.mjs`.
+- `src/lib/word-source.ts` — the AI prompt, `parseWords` and `generateWords`.
+  Prefers the Workers AI binding (`env.AI`, `WORKERS_AI_MODEL`) and falls back to
+  an OpenAI-compatible endpoint; drops the first word and caps at five.
+  Runtime-free so the Worker and dev server share it.
+- `src/lib/words-api.ts` — the `/api/words` HTTP handler and `resolveWordSource`.
+  Used by both `worker/index.ts` and the dev plugin in `astro.config.mjs`.
 - `src/lib/words.ts` — the browser client for `/api/words`; typed `WordApiError`
   kinds (`network` / `server` / `format` / `empty` / `turnstile`).
 - `src/lib/turnstile.ts` — canonical Turnstile siteverify plus the signed,
@@ -79,14 +80,20 @@ lockfile is `bun.lock`; do not add `package-lock.json`, `yarn.lock` or
 
 ## Word generation
 
-Server-side only; the API key must never reach the browser. `words.ts` calls
+Server-side only; no key or binding must ever reach the browser. `words.ts` calls
 `GET /api/words?term=…`; `words-api.ts` validates and delegates to
-`word-source.ts`, which asks an OpenAI-compatible chat endpoint for **5–15** words,
-**ignores the first**, and returns **up to 5**; the client picks one at random.
+`word-source.ts`, which asks an AI model for **5–15** words, **ignores the first**,
+and returns **up to 5**; the client picks one at random.
 
-Env vars: `AI_ENDPOINT` (required), `AI_API_KEY` (required secret), `AI_MODEL`
-(optional, defaults to `gpt-4o-mini`). Local dev reads `.env`; `wrangler dev` reads
-`.dev.vars`; production uses `wrangler secret put AI_API_KEY`. Do not add these to
+The primary source is the **Cloudflare Workers AI binding** (`env.AI`), configured
+by the `ai` block in `wrangler.jsonc`; it needs no secret. The model comes from the
+`WORKERS_AI_MODEL` var (set in `wrangler.jsonc`, defaulting to
+`@cf/zai-org/glm-4.7-flash` in `word-source.ts` — update it there or via the var if
+the catalog moves on).
+The OpenAI-compatible endpoint is a **fallback** only, used when the binding is
+absent (local `astro dev`) or fails. Fallback env vars: `AI_ENDPOINT` and
+`AI_API_KEY` (both optional), `AI_MODEL` (optional, defaults to `gpt-4o-mini`).
+Local dev reads `.env`; `wrangler dev` reads `.dev.vars`. Do not add these to
 `settings.json` or any client code.
 
 Categories are limited to 1–60 characters (`CATEGORY_MAX_LENGTH` in
@@ -137,7 +144,7 @@ Only `/play` ships JavaScript; the other pages stay static and script-free
 - `worker/index.ts` declares its `Env` type inline instead of using
   `@cloudflare/workers-types`, which clashes with the DOM lib on the Astro/React
   side. `Env` is a `type` alias (not an `interface`) so it is assignable to
-  `Record<string, unknown>` in `resolveWordEnv`.
+  `Record<string, unknown>` in `resolveWordSource`.
 - The site collects **no personal data**, but the category a player types is sent
   server-side and on to the AI provider. Keep `src/content/legal/privacy.md` in step
   with anything new.
@@ -158,8 +165,11 @@ Only `/play` ships JavaScript; the other pages stay static and script-free
 - Deployed as a **Cloudflare Worker with static assets** via Workers Builds
   (`bun run build` → `bunx wrangler deploy`), configured by `wrangler.jsonc`
   (`name: client-b3-happypaul55-com`, `main: worker/index.ts`, `assets.directory:
-  ./dist`, `assets.binding: ASSETS`, `run_worker_first: ["/api/*"]`).
-- Set `AI_API_KEY` (secret) and `AI_ENDPOINT` / `AI_MODEL` before the first deploy.
+  ./dist`, `assets.binding: ASSETS`, `run_worker_first: ["/api/*"]`, `ai.binding:
+  AI`).
+- Word generation uses the `env.AI` binding and needs no secrets; only
+  `TURNSTILE_SECRET` must be set before the first deploy. The `AI_*` fallback vars
+  are optional.
 - `site` is `https://b3.happypaul55.com`; keep `astro.config.mjs`,
   `settings.json.url` and `public/robots.txt` in step if the domain changes.
 - Keep `README.md` accurate for handover: commands, build/output, deploy location,

@@ -8,7 +8,8 @@
  * Types are declared inline rather than pulling in `@cloudflare/workers-types`,
  * which would clash with the DOM lib used by the Astro/React side of the repo.
  */
-import { handleWordsRequest, resolveWordEnv } from "../src/lib/words-api";
+import { handleWordsRequest, resolveWordSource } from "../src/lib/words-api";
+import type { AiBinding } from "../src/lib/word-source";
 import {
   handleSessionRequest,
   requireTurnstileSession,
@@ -17,6 +18,11 @@ import {
 
 type Env = {
   ASSETS: { fetch(request: Request): Promise<Response> };
+  /** Workers AI binding, configured by the `ai` block in wrangler.jsonc. */
+  AI?: AiBinding;
+  /** Workers AI model id for the binding; defaults in code if unset. */
+  WORKERS_AI_MODEL?: string;
+  /** Optional fallback used when the AI binding is unavailable or fails. */
   AI_ENDPOINT?: string;
   AI_API_KEY?: string;
   AI_MODEL?: string;
@@ -36,7 +42,7 @@ export default {
     if (pathname === "/api/words") {
       const denial = await requireTurnstileSession(request, turnstile);
       if (denial) return denial;
-      return handleWordsRequest(request, resolveWordEnv(env));
+      return handleWordsRequest(request, resolveWordSource(env));
     }
 
     return env.ASSETS.fetch(request);

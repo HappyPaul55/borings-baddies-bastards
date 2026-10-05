@@ -3,7 +3,12 @@
  * dev server so both behave identically. Kept separate from `word-source.ts` so
  * the AI logic can be tested without constructing requests.
  */
-import { WordSourceError, generateWords, type WordSourceEnv } from "./word-source";
+import {
+  WordSourceError,
+  generateWords,
+  type AiBinding,
+  type WordSourceEnv,
+} from "./word-source";
 import { CATEGORY_MAX_LENGTH } from "./limits";
 
 const JSON_HEADERS = {
@@ -11,14 +16,45 @@ const JSON_HEADERS = {
   "cache-control": "no-store",
 };
 
-/** Read the AI settings out of a Worker `env` / process env bag. */
-export function resolveWordEnv(env: Record<string, unknown>): WordSourceEnv | null {
+function isAiBinding(value: unknown): value is AiBinding {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { run?: unknown }).run === "function"
+  );
+}
+
+/**
+ * Read the word-service settings out of a Worker `env` / process env bag.
+ *
+ * The Workers AI binding (`env.AI`) is preferred and needs no variables; the
+ * optional `WORKERS_AI_MODEL` selects its model. The `AI_*` variables are the
+ * optional fallback for runtimes without the binding (local dev). Returns `null`
+ * when neither source is available.
+ */
+export function resolveWordSource(
+  env: Record<string, unknown>,
+): WordSourceEnv | null {
+  const ai = isAiBinding(env.AI) ? env.AI : undefined;
+  const aiModel =
+    typeof env.WORKERS_AI_MODEL === "string" ? env.WORKERS_AI_MODEL : undefined;
   const endpoint = typeof env.AI_ENDPOINT === "string" ? env.AI_ENDPOINT : "";
   const apiKey = typeof env.AI_API_KEY === "string" ? env.AI_API_KEY : "";
   const model = typeof env.AI_MODEL === "string" ? env.AI_MODEL : undefined;
 
-  if (!endpoint || !apiKey) return null;
-  return { endpoint, apiKey, model };
+  if (!ai && (!endpoint || !apiKey)) return null;
+
+  const source: WordSourceEnv = {};
+  if (ai) {
+    source.ai = ai;
+    source.aiModel = aiModel;
+  }
+  if (endpoint && apiKey) {
+    source.endpoint = endpoint;
+    source.apiKey = apiKey;
+    source.model = model;
+  }
+  return source;
 }
 
 function json(body: unknown, status: number): Response {

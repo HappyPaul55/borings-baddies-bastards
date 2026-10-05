@@ -80,7 +80,7 @@ function devApi() {
               denial ??
               (await words.handleWordsRequest(
                 request,
-                words.resolveWordEnv(env),
+                words.resolveWordSource(env),
               ));
           }
 

@@ -5,7 +5,7 @@ import {
   parseWords,
   type WordSourceEnv,
 } from "./word-source";
-import { handleWordsRequest, resolveWordEnv } from "./words-api";
+import { handleWordsRequest, resolveWordSource } from "./words-api";
 
 const originalFetch = globalThis.fetch;
 const env: WordSourceEnv = { endpoint: "https://ai.test/chat", apiKey: "k" };
@@ -20,6 +20,20 @@ function stubChat(content: string, status = 200): void {
       status,
       headers: { "content-type": "application/json" },
     })) as typeof fetch;
+}
+
+/** An AI binding stub that resolves with `reply`. */
+function bindingReturning(reply: unknown): NonNullable<WordSourceEnv["ai"]> {
+  return { run: async () => reply };
+}
+
+/** An AI binding stub that always throws. */
+function failingBinding(): NonNullable<WordSourceEnv["ai"]> {
+  return {
+    run: async () => {
+      throw new Error("binding down");
+    },
+  };
 }
 
 describe("parseWords", () => {
@@ -115,22 +129,98 @@ describe("generateWords", () => {
       status: 422,
     });
   });
-});
 
-describe("resolveWordEnv", () => {
-  test("is null without an endpoint and key", () => {
-    expect(resolveWordEnv({})).toBeNull();
-    expect(resolveWordEnv({ AI_ENDPOINT: "https://ai.test" })).toBeNull();
+  test("prefers the Workers AI binding over the endpoint", async () => {
+    globalThis.fetch = (async () => {
+      throw new Error("the endpoint should not be called");
+    }) as typeof fetch;
+    const words = await generateWords("Animals", {
+      ai: bindingReturning({ response: "cat, dog, fox, owl, bat" }),
+      endpoint: "https://ai.test/chat",
+      apiKey: "k",
+    });
+    expect(words).toEqual(["dog", "fox", "owl", "bat"]);
   });
 
-  test("reads the three settings", () => {
+  test("reads an OpenAI-shaped binding reply too", async () => {
+    const words = await generateWords("Animals", {
+      ai: bindingReturning({
+        choices: [{ message: { content: "cat, dog, fox, owl, bat" } }],
+      }),
+    });
+    expect(words).toEqual(["dog", "fox", "owl", "bat"]);
+  });
+
+  test("falls back to the endpoint when the binding fails", async () => {
+    stubChat("cat, dog, fox, owl, bat");
+    const words = await generateWords("Animals", {
+      ai: failingBinding(),
+      endpoint: "https://ai.test/chat",
+      apiKey: "k",
+    });
+    expect(words).toEqual(["dog", "fox", "owl", "bat"]);
+  });
+
+  test("surfaces the binding error when there is no fallback", async () => {
+    await expect(
+      generateWords("Animals", { ai: failingBinding() }),
+    ).rejects.toMatchObject({ status: 502 });
+  });
+
+  test("passes the configured Workers AI model to the binding", async () => {
+    const models: string[] = [];
+    const ai = {
+      run: async (model: string) => {
+        models.push(model);
+        return { response: "cat, dog, fox, owl, bat" };
+      },
+    };
+    await generateWords("Animals", { ai, aiModel: "@cf/test/model" });
+    expect(models).toEqual(["@cf/test/model"]);
+  });
+
+  test("needs a binding or an endpoint to be configured", async () => {
+    await expect(generateWords("Animals", {})).rejects.toThrow(/not configured/);
+  });
+});
+
+describe("resolveWordSource", () => {
+  test("is null without a binding, endpoint and key", () => {
+    expect(resolveWordSource({})).toBeNull();
+    expect(resolveWordSource({ AI_ENDPOINT: "https://ai.test" })).toBeNull();
+  });
+
+  test("reads the three fallback settings", () => {
     expect(
-      resolveWordEnv({
+      resolveWordSource({
         AI_ENDPOINT: "https://ai.test",
         AI_API_KEY: "secret",
         AI_MODEL: "small",
       }),
     ).toEqual({ endpoint: "https://ai.test", apiKey: "secret", model: "small" });
+  });
+
+  test("detects the Workers AI binding", () => {
+    const ai = bindingReturning({ response: "ok" });
+    expect(resolveWordSource({ AI: ai })).toEqual({ ai });
+  });
+
+  test("reads the Workers AI model from the env", () => {
+    const ai = bindingReturning({ response: "ok" });
+    expect(
+      resolveWordSource({ AI: ai, WORKERS_AI_MODEL: "@cf/test/model" }),
+    ).toMatchObject({ ai, aiModel: "@cf/test/model" });
+  });
+
+  test("keeps the fallback alongside the binding", () => {
+    const ai = bindingReturning({ response: "ok" });
+    expect(
+      resolveWordSource({
+        AI: ai,
+        AI_ENDPOINT: "https://ai.test",
+        AI_API_KEY: "secret",
+      }),
+    ).toMatchObject({ ai, endpoint: "https://ai.test", apiKey: "secret" });
   });
 });
 

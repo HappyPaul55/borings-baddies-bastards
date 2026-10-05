@@ -7,8 +7,11 @@
   "compatibility_date": "2026-09-26",
   // Comma-separated hostnames accepted from Turnstile siteverify. Production
   // only — local dev sets its own list (with localhost) in `.env`.
+  // WORKERS_AI_MODEL selects the Workers AI model used by the `env.AI` binding;
+  // change it here instead of in code.
   "vars": {
-    "TURNSTILE_HOSTNAMES": "b3.happypaul55.com"
+    "TURNSTILE_HOSTNAMES": "b3.happypaul55.com",
+    "WORKERS_AI_MODEL": "@cf/zai-org/glm-4.7-flash"
   },
   // Custom domains are managed in the Cloudflare dashboard. Explicitly disable the
   // workers.dev route and version preview URLs so neither is re-enabled on deploy.
@@ -19,5 +22,10 @@
     "binding": "ASSETS",
     "not_found_handling": "404-page",
     "run_worker_first": ["/api/*"]
+  },
+  // Workers AI binding, exposed to the Worker as `env.AI`. This is the primary
+  // word-generation path and needs no secrets or vars.
+  "ai": {
+    "binding": "AI"
   }
 }

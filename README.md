@@ -28,7 +28,7 @@ The site is **B3** (`b3.happypaul55.com`); the full game name is set in
 ## Local development
 
 ```bash
-cp .env.example .env   # then fill in AI_ENDPOINT / AI_API_KEY (word generation)
+cp .env.example .env   # optional: fallback AI config for local dev
 bun install
 bun run dev      # dev server on http://localhost:4321
 bun run build    # production build into dist/
@@ -44,10 +44,11 @@ Requires Node.js 20+ and [Bun](https://bun.sh). Use `bun` (never `npm`) and `bun
 `bun test` and `bun run build`.
 
 `astro dev` serves `/api/words` and `/api/session` itself, using the same handlers
-the Worker runs in production, reading `.env`. Without `AI_ENDPOINT`/`AI_API_KEY`
-the game still runs and simply shows the "word service unavailable" state when a
-round starts. Without `TURNSTILE_SECRET`/`TURNSTILE_HOSTNAMES` the game refuses to
-start (the human check fails closed).
+the Worker runs in production, reading `.env`. Local dev has no Workers AI
+binding, so word generation falls back to `AI_ENDPOINT`/`AI_API_KEY`; without
+them the game still runs and shows the "word service unavailable" state when a
+round starts. Without `TURNSTILE_SECRET`/`TURNSTILE_HOSTNAMES` the game refuses
+to start (the human check fails closed).
 
 ## Tests
 
@@ -58,17 +59,19 @@ start (the human check fails closed).
 - `src/lib/game-store.test.ts` — the `Game` class (validation, a full round,
   recovery from a failing word service, reset).
 - `src/lib/word-source.test.ts` — prompt/parse behaviour (`parseWords` drops the
-  first word and caps at five) and the `/api/words` handler statuses.
+  first word and caps at five), binding-first/fallback selection, and the
+  `/api/words` handler statuses.
 
-35 tests, no external services required (the AI call is stubbed). The test files are
-excluded from `astro check`'s tsconfig because they import `bun:test`.
+No external services are required (the AI call and the Workers AI binding are
+stubbed). The test files are excluded from `astro check`'s tsconfig because they
+import `bun:test`.
 
 ## Word generation
 
-The secret word is produced **server-side** — the AI API key never reaches the
+The secret word is produced **server-side** — no key or binding ever reaches the
 browser. `src/lib/words.ts` (client) calls `GET /api/words?term=…`; the handler in
-`src/lib/words-api.ts` and `src/lib/word-source.ts` asks an OpenAI-compatible chat
-model for a list of words, then:
+`src/lib/words-api.ts` and `src/lib/word-source.ts` asks an AI model for a list of
+words, then:
 
 - asks for **between 5 and 15** words,
 - caps the model's reply at **500 tokens**,
@@ -76,21 +79,33 @@ model for a list of words, then:
 - returns **up to 5** words,
 - the client picks one at random and shows it only to the roles that may see it.
 
+There are two sources, in order:
+
+1. **Cloudflare Workers AI binding** (`env.AI`) — the default. It is configured by
+   the `ai` block in `wrangler.jsonc` and needs no secret, so production works out
+   of the box. The model is chosen with the `WORKERS_AI_MODEL` var (set in
+   `wrangler.jsonc`, currently `@cf/zai-org/glm-4.7-flash`, one of Cloudflare's
+   recommended text-generation models); if it is unset, a default in
+   `src/lib/word-source.ts` is used.
+2. **OpenAI-compatible endpoint** — an optional fallback, used when the binding is
+   absent (local `astro dev`) or the binding call fails. Configured entirely via
+   environment variables:
+
+| Variable            | Required | Notes                                                          |
+| ------------------- | -------- | -------------------------------------------------------------- |
+| `WORKERS_AI_MODEL`  | no       | Model id for the `env.AI` binding; set in `wrangler.jsonc`     |
+| `AI_ENDPOINT`       | no       | Fallback only. Full URL of a chat-completions endpoint         |
+| `AI_API_KEY`        | no       | Fallback secret. `wrangler secret put AI_API_KEY` in production |
+| `AI_MODEL`          | no       | Fallback model id; defaults to `gpt-4o-mini`                   |
+
+For local development put the fallback in `.env` (git-ignored); for `wrangler dev`
+use `.dev.vars`. Neither is needed in production, where the binding is used first.
+If the binding fails and a fallback is configured, the request is retried against
+the endpoint automatically.
+
 A category must be 1–60 characters; the limit lives in `src/lib/limits.ts`
 (`CATEGORY_MAX_LENGTH`) and is enforced both by the input's `maxLength` and by the
 server before any AI call.
-
-Configuration is entirely via environment variables:
-
-| Variable      | Required | Notes                                                        |
-| ------------- | -------- | ------------------------------------------------------------ |
-| `AI_ENDPOINT` | yes      | Full URL of an OpenAI-compatible chat-completions endpoint   |
-| `AI_API_KEY`  | yes      | Secret. `wrangler secret put AI_API_KEY` in production       |
-| `AI_MODEL`    | no       | Model id; defaults to `gpt-4o-mini`                          |
-
-For local development put them in `.env` (git-ignored); for `wrangler dev` use
-`.dev.vars`; in production set `AI_API_KEY` as a secret and the others as Worker
-vars.
 
 ## Human check (Cloudflare Turnstile)
 
@@ -146,10 +161,13 @@ The production origin is `https://b3.happypaul55.com`, set as `site` in
 Set production secrets before the first deploy:
 
 ```bash
-bunx wrangler secret put AI_API_KEY
 bunx wrangler secret put TURNSTILE_SECRET
-# and AI_ENDPOINT / AI_MODEL as vars or secrets; TURNSTILE_HOSTNAMES is a var in wrangler.jsonc
 ```
+
+Word generation uses the Workers AI binding (`env.AI`), so it needs no secrets or
+vars — deploy as-is. `AI_API_KEY` and `AI_ENDPOINT` / `AI_MODEL` are only needed
+if you deliberately want the fallback endpoint in production.
+`TURNSTILE_HOSTNAMES` is a var in `wrangler.jsonc`.
 
 ## Content and code layout
 
