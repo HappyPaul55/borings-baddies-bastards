@@ -246,9 +246,12 @@ else that collects personal data is added.
 - `sitemap-index.xml` (via `@astrojs/sitemap`) and `robots.txt`; the 404 is
   `noindex` and excluded from the sitemap.
 - `public/_headers` sets security headers (CSP, HSTS, `nosniff`, frame denial) and
-  long-lived caching. The CSP keeps `connect-src`/`frame-src`/`script-src` scoped
-  to this origin plus `https://challenges.cloudflare.com` for the Turnstile
-  widget; the AI call still happens server-side.
+  long-lived caching. The CSP allows no `'unsafe-inline'`: CSS is external, and the
+  static build hashes Astro's island runtime into `dist/_headers` with
+  `src/integrations/csp-hashes.mjs`. It keeps
+  `connect-src`/`frame-src`/`script-src` scoped to this origin plus
+  `https://challenges.cloudflare.com` for the Turnstile widget; the AI call still
+  happens server-side.
 - `public/_redirects` is present and empty (no legacy URLs yet).
 
 ## Licence

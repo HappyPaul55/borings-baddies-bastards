@@ -18,6 +18,17 @@
   // workers.dev route and version preview URLs so neither is re-enabled on deploy.
   "workers_dev": false,
   "preview_urls": false,
+  // Workers Builds needs a previews block to deploy a non-production branch
+  // preview; mirror the production vars/binding so the preview still works.
+  "previews": {
+    "vars": {
+      "TURNSTILE_HOSTNAMES": "b3.happypaul55.com",
+      "WORKERS_AI_MODEL": "@cf/meta/llama-3.1-8b-instruct-fast"
+    },
+    "ai": {
+      "binding": "AI"
+    }
+  },
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",

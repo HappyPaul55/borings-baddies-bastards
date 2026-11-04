@@ -237,6 +237,20 @@
     border-left: 4px solid var(--color-bastard);
   }
 
+  /* Static hero card arrangement; kept as CSS so the CSP can forbid inline
+     styles. */
+  .hero-role:nth-child(1) {
+    transform: rotate(-2.5deg);
+  }
+  .hero-role:nth-child(2) {
+    transform: rotate(1.5deg);
+    margin-inline-start: 0.75rem;
+  }
+  .hero-role:nth-child(3) {
+    transform: rotate(-1deg);
+    margin-inline-start: 1.5rem;
+  }
+
   /* Flat panel used inside the game shell (no hover lift) */
   .panel {
     border: 1px solid var(--color-line-strong);
