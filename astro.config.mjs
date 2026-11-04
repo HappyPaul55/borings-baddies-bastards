@@ -4,6 +4,7 @@ import sitemap from "@astrojs/sitemap";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import { loadEnv } from "vite";
+import cspHashes from "./src/integrations/csp-hashes.mjs";
 
 /**
  * Serves `/api/words` and `/api/session` during `astro dev` using the exact
@@ -104,11 +105,15 @@ export default defineConfig({
   site: "https://b3.happypaul55.com",
   build: {
     format: "file",
-    inlineStylesheets: "always",
+    // External CSS/JS so the CSP can forbid inline styles and scripts.
+    inlineStylesheets: "never",
   },
   trailingSlash: "never",
-  integrations: [sitemap(), react()],
+  integrations: [sitemap(), react(), cspHashes()],
   vite: {
+    build: {
+      assetsInlineLimit: 0,
+    },
     plugins: [tailwindcss(), devApi()],
   },
 });
